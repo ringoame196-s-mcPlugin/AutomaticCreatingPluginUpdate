@@ -26,6 +26,8 @@ class ServerManager(private val plugin: JavaPlugin) {
                 response = "Reload $pluginName"
                 val command = config.getString("ReloadCommand")?.replace("@pluginName", pluginName) ?: "/pluginmanager reload $pluginName"
                 sendClickableCommandMessage(command, pluginName)
+                val message = "${ChatColor.GOLD}${pluginName}のアップデートを受信しました"
+                sendMessageToOp(message)
             } else { // プラグインを見つけられなかった場合
                 response = "pluginNotFound"
             }
@@ -48,6 +50,13 @@ class ServerManager(private val plugin: JavaPlugin) {
 
     private fun isPluginEnabled(pluginName: String): Boolean { // プラグインがあるか確認
         return Bukkit.getPluginManager().getPlugin(pluginName) != null
+    }
+
+    private fun sendMessageToOp(message: String) {
+        for (player in Bukkit.getOnlinePlayers()) {
+            if (!player.isOp) continue
+            player.sendMessage("${ChatColor.YELLOW}[${plugin.name}]$message")
+        }
     }
 
     private fun sendClickableCommandMessage(command: String, pluginName: String) { // プラグインリロードメッセージ 送信

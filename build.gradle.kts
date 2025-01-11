@@ -1,8 +1,9 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import dev.s7a.gradle.minecraft.server.tasks.LaunchMinecraftServerTask
-import dev.s7a.gradle.minecraft.server.tasks.LaunchMinecraftServerTask.JarUrl
 import groovy.lang.Closure
 import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
+import java.net.HttpURLConnection
+import java.net.ConnectException
+import java.net.URL
 
 plugins {
     kotlin("jvm") version "1.6.10"
@@ -54,6 +55,34 @@ tasks.named("build") {
         copy {
             from(buildDir.resolve("libs/${project.name}.jar"))
             into("D:/デスクトップ/Twitterサーバー/plugins")
+        }
+    }
+
+    doLast { // AutomaticCreatingPluginUpdate連携
+        // APIリクエストを行う
+        val port = 25585
+        val apiUrl = "http://localhost:$port/plugin?name=${project.name}"
+        val url = URL(apiUrl)
+        val connection = url.openConnection() as HttpURLConnection
+
+        try {
+            connection.requestMethod = "GET"
+            connection.connect()
+
+            // レスポンスコードを確認
+            if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+                val response = connection.inputStream.bufferedReader().use { it.readText() }
+                println("API Response: $response")
+            } else {
+                println("Failed to get response: ${connection.responseCode}")
+            }
+        } catch (e: ConnectException) {
+            println("Could not connect to reload destination server: ${e.message}")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            println("Error during API request: ${e.message}")
+        } finally {
+            connection.disconnect()
         }
     }
 }

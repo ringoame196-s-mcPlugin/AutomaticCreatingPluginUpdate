@@ -12,7 +12,7 @@ class Main : JavaPlugin() {
     }
 
     override fun onDisable() {
-        super.onDisable()
         serverManager.stop() // サーバーストップ
+        super.onDisable()
     }
 }
