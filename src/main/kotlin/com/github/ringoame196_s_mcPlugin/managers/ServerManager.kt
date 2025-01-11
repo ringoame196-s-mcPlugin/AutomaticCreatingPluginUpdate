@@ -1,4 +1,4 @@
-package com.github.ringoame196_s_mcPlugin
+package com.github.ringoame196_s_mcPlugin.managers
 
 import com.sun.net.httpserver.HttpServer
 import net.md_5.bungee.api.chat.ClickEvent
@@ -7,6 +7,7 @@ import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
+import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.OutputStream
 import java.net.InetSocketAddress
@@ -22,15 +23,17 @@ class ServerManager(private val plugin: JavaPlugin) {
             val pluginName = query?.split("=")?.getOrNull(1) ?: "null" // プラグイン名取得
 
             val response: String // webサイトに表示させるメッセージ
-            if (isPluginEnabled(pluginName)) { // プラグインを見つけた場合
-                response = "Reload $pluginName"
-                val command = config.getString("ReloadCommand")?.replace("@pluginName", pluginName) ?: "/pluginmanager reload $pluginName"
-                sendClickableCommandMessage(command, pluginName)
-                val message = "${ChatColor.GOLD}${pluginName}のアップデートを受信しました"
-                sendMessageToOp(message)
-            } else { // プラグインを見つけられなかった場合
+            val reloadPlugin = acquisitionPlugin(pluginName)
+
+            if (reloadPlugin == null) {
                 response = "pluginNotFound"
+            } else {
+                response = "Reload $pluginName"
+                val command = config.getString("ReloadCommand")?.replace("@pluginName", pluginName)
+                    ?: "/pluginmanager reload $pluginName"
+                sendClickableCommandMessage(command, pluginName)
             }
+
             // webサイトの内容を書き換える
             exchange.sendResponseHeaders(200, response.length.toLong())
             exchange.responseBody.use { os: OutputStream ->
@@ -40,23 +43,16 @@ class ServerManager(private val plugin: JavaPlugin) {
 
         server.executor = null // default executor
         server.start()
-        println("[${plugin.name}] Server started on port $port") // 通知
+        Bukkit.getLogger().info("[${plugin.name}] Server started on port $port") // 通知
     }
 
     fun stop() {
         server.stop(1) // サーバーを止める
-        println("[${plugin.name}] Server stopped")
+        Bukkit.getLogger().info("[${plugin.name}] Server stopped")
     }
 
-    private fun isPluginEnabled(pluginName: String): Boolean { // プラグインがあるか確認
-        return Bukkit.getPluginManager().getPlugin(pluginName) != null
-    }
-
-    private fun sendMessageToOp(message: String) {
-        for (player in Bukkit.getOnlinePlayers()) {
-            if (!player.isOp) continue
-            player.sendMessage("${ChatColor.YELLOW}[${plugin.name}]$message")
-        }
+    private fun acquisitionPlugin(pluginName: String): Plugin? { // プラグインがあるか確認
+        return Bukkit.getPluginManager().getPlugin(pluginName)
     }
 
     private fun sendClickableCommandMessage(command: String, pluginName: String) { // プラグインリロードメッセージ 送信
