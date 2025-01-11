@@ -33,10 +33,11 @@ dependencies {
 }
 
 configure<BukkitPluginDescription> {
-    main = "com.github.Ringoame196.Main"
+    main = "com.github.ringoame196_s_mcPlugin.Main"
     version = gitVersion()
     apiVersion = "1." + pluginVersion.split(".")[1]
     depend = listOf("PluginManager")
+    website = "https://github.com/ringoame196-s-mcPlugin"
 }
 
 tasks.withType<ShadowJar> {
@@ -55,22 +56,6 @@ tasks.named("build") {
             into("D:/デスクトップ/Twitterサーバー/plugins")
         }
     }
-}
-
-task<LaunchMinecraftServerTask>("buildAndLaunchServer") {
-    dependsOn("build")
-    doFirst {
-        copy {
-            from(buildDir.resolve("libs/${project.name}.jar"))
-            into(buildDir.resolve("MinecraftServer/plugins"))
-        }
-    }
-
-    jarUrl.set(JarUrl.Paper(pluginVersion))
-    jarName.set("server.jar")
-    serverDirectory.set(buildDir.resolve("MinecraftServer"))
-    nogui.set(true)
-    agreeEula.set(true)
 }
 
 task<SetupTask>("setup")

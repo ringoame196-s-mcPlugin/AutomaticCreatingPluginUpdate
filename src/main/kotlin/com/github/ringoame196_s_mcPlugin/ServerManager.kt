@@ -1,4 +1,4 @@
-package com.github.Ringoame196
+package com.github.ringoame196_s_mcPlugin
 
 import com.sun.net.httpserver.HttpServer
 import net.md_5.bungee.api.chat.ClickEvent

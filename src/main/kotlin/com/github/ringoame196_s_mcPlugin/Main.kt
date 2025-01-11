@@ -1,4 +1,4 @@
-package com.github.Ringoame196
+package com.github.ringoame196_s_mcPlugin
 
 import org.bukkit.plugin.java.JavaPlugin
 

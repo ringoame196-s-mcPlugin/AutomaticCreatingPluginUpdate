@@ -22,7 +22,7 @@
 [使用例](https://github.com/Ringoame196/KotlinSpigotPluginTemplate/blob/master/build.gradle.kts)のtasks.named("build")の箇所
 
 ## 開発環境
-- Minecraft Version : 1.20.1
+- Minecraft Version : 1.20.4
 - Kotlin Version : 1.6.10
 
 ## プロジェクト情報
