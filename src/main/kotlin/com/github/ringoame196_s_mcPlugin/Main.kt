@@ -6,6 +6,7 @@ import org.bukkit.plugin.java.JavaPlugin
 class Main : JavaPlugin() {
     private val plugin = this
     private val serverManager = ServerManager(plugin)
+
     override fun onEnable() {
         super.onEnable()
         plugin.saveDefaultConfig() // configファイル生成
