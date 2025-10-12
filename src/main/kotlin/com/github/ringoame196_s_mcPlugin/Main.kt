@@ -1,5 +1,6 @@
 package com.github.ringoame196_s_mcPlugin
 
+import com.github.ringoame196_s_mcPlugin.commands.Command
 import com.github.ringoame196_s_mcPlugin.managers.ServerManager
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -10,6 +11,10 @@ class Main : JavaPlugin() {
     override fun onEnable() {
         super.onEnable()
         plugin.saveDefaultConfig() // configファイル生成
+
+        val command = getCommand("pluginupdate")
+        command!!.setExecutor(Command(plugin))
+
         serverManager.start() // サーバー起動
     }
 

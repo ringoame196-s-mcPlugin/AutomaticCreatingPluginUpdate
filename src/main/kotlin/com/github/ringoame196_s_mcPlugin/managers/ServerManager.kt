@@ -1,5 +1,6 @@
 package com.github.ringoame196_s_mcPlugin.managers
 
+import com.github.ringoame196_s_mcPlugin.Data
 import com.sun.net.httpserver.HttpServer
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.ComponentBuilder
@@ -29,9 +30,9 @@ class ServerManager(private val plugin: JavaPlugin) {
                 response = "pluginNotFound"
             } else {
                 response = "Reload $pluginName"
-                val command = config.getString("ReloadCommand")?.replace("@pluginName", pluginName)
-                    ?: "/pluginmanager reload $pluginName"
+                val command = "/pluginupdate $pluginName"
                 sendClickableCommandMessage(command, pluginName)
+                Data.reloadablePlugin.add(pluginName)
             }
 
             // webサイトの内容を書き換える

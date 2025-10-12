@@ -39,6 +39,21 @@ configure<BukkitPluginDescription> {
     apiVersion = "1." + pluginVersion.split(".")[1]
     depend = listOf("PluginManager")
     website = "https://github.com/ringoame196-s-mcPlugin"
+
+    commands {
+        register("pluginupdate") {
+            description = "AutomaticCreatingPluginUpdate用コマンド"
+            usage = "/pluginupdate <プラグイン名>"
+            permission = "automatic_creating_plugin_update.op"
+        }
+    }
+
+    permissions{
+        register("automatic_creating_plugin_update.op") {
+            description = "itemBag giveを使うための権限"
+            default = BukkitPluginDescription.Permission.Default.OP // TRUE, FALSE, OP or NOT_OP
+        }
+    }
 }
 
 tasks.withType<ShadowJar> {
@@ -51,38 +66,46 @@ tasks.withType<ShadowJar> {
 
 tasks.named("build") {
     dependsOn("shadowJar")
-    doFirst {
-        copy {
-            from(buildDir.resolve("libs/${project.name}.jar"))
-            into("D:/デスクトップ/Twitterサーバー/plugins")
-        }
-    }
-
-    doLast { // AutomaticCreatingPluginUpdate連携
-        // APIリクエストを行う
-        val port = 25585
-        val apiUrl = "http://localhost:$port/plugin?name=${project.name}"
-        val url = URL(apiUrl)
-        val connection = url.openConnection() as HttpURLConnection
-
-        try {
-            connection.requestMethod = "GET"
-            connection.connect()
-
-            // レスポンスコードを確認
-            if (connection.responseCode == HttpURLConnection.HTTP_OK) {
-                val response = connection.inputStream.bufferedReader().use { it.readText() }
-                println("API Response: $response")
-            } else {
-                println("Failed to get response: ${connection.responseCode}")
+    val copyFilePath = "M:/TwitterServer/plugins/" // コピー先のフォルダーパス
+    val copyFile = File(copyFilePath)
+    if (copyFile.exists() && copyFile.isDirectory) {
+        doFirst {
+            copy {
+                from(buildDir.resolve("libs/${project.name}.jar"))
+                into(copyFile)
             }
-        } catch (e: ConnectException) {
-            println("Could not connect to reload destination server: ${e.message}")
-        } catch (e: Exception) {
-            e.printStackTrace()
-            println("Error during API request: ${e.message}")
-        } finally {
-            connection.disconnect()
+        }
+        doLast {
+            val port = 25585
+            val ip = "192.168.0.21"
+            val apiUrl = "http://$ip:$port/plugin?name=${project.name}"
+
+            try {
+                val url = URL(apiUrl)
+                val connection = url.openConnection() as HttpURLConnection
+
+                // タイムアウト設定（重要）
+                connection.connectTimeout = 2000  // 2秒でタイムアウト
+                connection.readTimeout = 2000
+
+                connection.requestMethod = "GET"
+                connection.connect()
+
+                if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+                    val response = connection.inputStream.bufferedReader().use { it.readText() }
+                    println("API Response: $response")
+                } else {
+                    println("Server responded with error code: ${connection.responseCode}")
+                }
+
+                connection.disconnect()
+            } catch (e: java.net.ConnectException) {
+                println("Warning: サーバーに接続できません（オフラインかもしれません）")
+            } catch (e: java.net.SocketTimeoutException) {
+                println("Warning: 接続がタイムアウトしました")
+            } catch (e: Exception) {
+                println("Warning: API通信で予期しないエラーが発生しました: ${e.message}")
+            }
         }
     }
 }
