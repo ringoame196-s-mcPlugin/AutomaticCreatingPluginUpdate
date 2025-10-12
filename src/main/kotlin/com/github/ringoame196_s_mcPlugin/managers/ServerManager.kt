@@ -29,8 +29,7 @@ class ServerManager(private val plugin: JavaPlugin) {
                 response = "pluginNotFound"
             } else {
                 response = "Reload $pluginName"
-                val command = config.getString("ReloadCommand")?.replace("@pluginName", pluginName)
-                    ?: "/pluginmanager reload $pluginName"
+                val command = "/pluginupdate $pluginName"
                 sendClickableCommandMessage(command, pluginName)
             }
 

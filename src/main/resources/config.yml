@@ -1,2 +1,2 @@
 Port: 25585
-ReloadCommand : "/pluginmanager reload @pluginName"
+ReloadCommand : "pluginmanager reload @pluginName"
