@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/AutomaticCreatingPluginUpdate.main.iml" filepath="$PROJECT_DIR$/.idea/modules/AutomaticCreatingPluginUpdate.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/plugin.AutomaticCreatingPluginUpdate.main.iml" filepath="$PROJECT_DIR$/.idea/modules/plugin.AutomaticCreatingPluginUpdate.main.iml" />
     </modules>
   </component>
 </project>
