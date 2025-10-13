@@ -1,6 +1,7 @@
 package com.github.ringoame196_s_mcPlugin.managers
 
 import com.github.ringoame196_s_mcPlugin.Data
+import com.github.ringoame196_s_mcPlugin.ReloadManager
 import com.sun.net.httpserver.HttpServer
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.ComponentBuilder
@@ -16,6 +17,7 @@ import java.net.InetSocketAddress
 class ServerManager(private val plugin: JavaPlugin) {
     private val port = plugin.config.getInt("Port")
     private val server: HttpServer = HttpServer.create(InetSocketAddress(port), 0)
+    private val reloadManager = ReloadManager(plugin)
 
     fun start() {
         server.createContext("/plugin") { exchange ->
@@ -30,9 +32,15 @@ class ServerManager(private val plugin: JavaPlugin) {
                 response = "pluginNotFound"
             } else {
                 response = "Reload $pluginName"
-                val command = "/pluginupdate $pluginName"
-                sendClickableCommandMessage(command, pluginName)
+
                 Data.reloadablePlugin.add(pluginName)
+                if (reloadManager.autoReload(pluginName)) {
+                    val message = "${ChatColor.GOLD}[${plugin.name}] ${pluginName}を自動リロードしました"
+                    sendOpMessage(message)
+                } else {
+                    val command = "/pluginupdate $pluginName"
+                    sendClickableCommandMessage(command, pluginName)
+                }
             }
 
             // webサイトの内容を書き換える
@@ -78,6 +86,16 @@ class ServerManager(private val plugin: JavaPlugin) {
                 continue
             }
             player.spigot().sendMessage(mainMessage)
+        }
+    }
+
+    private fun sendOpMessage(message: String) {
+        // メッセージをOPプレイヤーに送信
+        for (player in Bukkit.getOnlinePlayers()) {
+            if (!player.isOp) {
+                continue
+            }
+            player.sendMessage(message)
         }
     }
 }
