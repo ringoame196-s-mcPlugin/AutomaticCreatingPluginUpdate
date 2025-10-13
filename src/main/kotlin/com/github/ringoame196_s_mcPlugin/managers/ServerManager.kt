@@ -1,7 +1,7 @@
 package com.github.ringoame196_s_mcPlugin.managers
 
 import com.github.ringoame196_s_mcPlugin.Data
-import com.github.ringoame196_s_mcPlugin.ReloadManager
+import com.github.ringoame196_s_mcPlugin.PluginManager
 import com.sun.net.httpserver.HttpServer
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.ComponentBuilder
@@ -9,7 +9,6 @@ import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
-import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.OutputStream
 import java.net.InetSocketAddress
@@ -17,16 +16,15 @@ import java.net.InetSocketAddress
 class ServerManager(private val plugin: JavaPlugin) {
     private val port = plugin.config.getInt("Port")
     private val server: HttpServer = HttpServer.create(InetSocketAddress(port), 0)
-    private val reloadManager = ReloadManager(plugin)
+    private val pluginManager = PluginManager(plugin)
 
     fun start() {
         server.createContext("/plugin") { exchange ->
-            val config = plugin.config // configファイル
             val query = exchange.requestURI.query
             val pluginName = query?.split("=")?.getOrNull(1) ?: "null" // プラグイン名取得
 
             val response: String // webサイトに表示させるメッセージ
-            val reloadPlugin = acquisitionPlugin(pluginName)
+            val reloadPlugin = pluginManager.acquisitionPlugin(pluginName)
 
             if (reloadPlugin == null) {
                 response = "pluginNotFound"
@@ -34,12 +32,24 @@ class ServerManager(private val plugin: JavaPlugin) {
                 response = "Reload $pluginName"
 
                 Data.reloadablePlugin.add(pluginName)
-                if (reloadManager.autoReload(pluginName)) {
-                    val message = "${ChatColor.GOLD}[${plugin.name}] ${pluginName}を自動リロードしました"
-                    sendOpMessage(message)
+                if (pluginManager.autoReload(pluginName)) {
+                    val message = "${ChatColor.YELLOW}[${plugin.name}]${pluginName}を自動リロードしました"
+                    pluginManager.sendOpMessage(message)
                 } else {
                     val command = "/pluginupdate $pluginName"
-                    sendClickableCommandMessage(command, pluginName)
+
+                    // メインメッセージ部分
+                    val mainMessage = TextComponent("${ChatColor.YELLOW}[${plugin.name}] プラグイン名($pluginName) ")
+                    // クリック可能なリロード部分
+                    val reloadComponent = TextComponent("${ChatColor.AQUA}[リロード]")
+                    // ホバーテキストを設定
+                    reloadComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentBuilder("クリックしてプラグインをリロードします").create())
+                    // クリック時にコマンド実行
+                    reloadComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, command)
+                    // メインメッセージにリロード部分を追加
+                    mainMessage.addExtra(reloadComponent)
+
+                    pluginManager.sendOpMessage(mainMessage)
                 }
             }
 
@@ -58,44 +68,5 @@ class ServerManager(private val plugin: JavaPlugin) {
     fun stop() {
         server.stop(1) // サーバーを止める
         Bukkit.getLogger().info("[${plugin.name}] Server stopped")
-    }
-
-    private fun acquisitionPlugin(pluginName: String): Plugin? { // プラグインがあるか確認
-        return Bukkit.getPluginManager().getPlugin(pluginName)
-    }
-
-    private fun sendClickableCommandMessage(command: String, pluginName: String) { // プラグインリロードメッセージ 送信
-        // メインメッセージ部分
-        val mainMessage = TextComponent("${ChatColor.YELLOW}[${plugin.name}] プラグイン名($pluginName) ")
-
-        // クリック可能なリロード部分
-        val reloadComponent = TextComponent("${ChatColor.AQUA}[リロード]")
-
-        // ホバーテキストを設定
-        reloadComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentBuilder("クリックしてプラグインをリロードします").create())
-
-        // クリック時にコマンド実行
-        reloadComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, command)
-
-        // メインメッセージにリロード部分を追加
-        mainMessage.addExtra(reloadComponent)
-
-        // メッセージをOPプレイヤーに送信
-        for (player in Bukkit.getOnlinePlayers()) {
-            if (!player.isOp) {
-                continue
-            }
-            player.spigot().sendMessage(mainMessage)
-        }
-    }
-
-    private fun sendOpMessage(message: String) {
-        // メッセージをOPプレイヤーに送信
-        for (player in Bukkit.getOnlinePlayers()) {
-            if (!player.isOp) {
-                continue
-            }
-            player.sendMessage(message)
-        }
     }
 }

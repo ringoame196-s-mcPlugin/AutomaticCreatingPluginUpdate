@@ -1,11 +1,12 @@
 package com.github.ringoame196_s_mcPlugin
 
+import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.command.CommandSender
 import org.bukkit.plugin.Plugin
 
-class ReloadManager(private val plugin: Plugin) {
+class PluginManager(private val plugin: Plugin) {
     private val config = plugin.config
 
     fun reloadPlugin(sender: CommandSender, pluginName: String) {
@@ -30,5 +31,29 @@ class ReloadManager(private val plugin: Plugin) {
             }
         )
         return true
+    }
+
+    fun acquisitionPlugin(pluginName: String): Plugin? { // プラグインがあるか確認
+        return Bukkit.getPluginManager().getPlugin(pluginName)
+    }
+
+    fun sendOpMessage(message: TextComponent) {
+        // メッセージをOPプレイヤーに送信
+        for (player in Bukkit.getOnlinePlayers()) {
+            if (!player.isOp) {
+                continue
+            }
+            player.spigot().sendMessage(message)
+        }
+    }
+
+    fun sendOpMessage(message: String) {
+        // メッセージをOPプレイヤーに送信
+        for (player in Bukkit.getOnlinePlayers()) {
+            if (!player.isOp) {
+                continue
+            }
+            player.sendMessage(message)
+        }
     }
 }
