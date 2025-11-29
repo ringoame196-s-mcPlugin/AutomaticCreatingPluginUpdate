@@ -37,7 +37,6 @@ configure<BukkitPluginDescription> {
     main = "com.github.ringoame196_s_mcPlugin.Main"
     version = gitVersion()
     apiVersion = "1." + pluginVersion.split(".")[1]
-    depend = listOf("PluginManager")
     website = "https://github.com/ringoame196-s-mcPlugin"
 
     commands {
