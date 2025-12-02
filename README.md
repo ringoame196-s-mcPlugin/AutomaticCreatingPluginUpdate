@@ -1,5 +1,8 @@
 # AutomaticCreatingPluginUpdate
 
+## 新リポジトリに移動
+[移行先](https://github.com/ringoame196-s-mcPlugin/Development/settings)
+
 ## プラグイン説明
 プラグイン開発を楽にする <br>
 簡易的なサーバーを起動することにより、1クリックリロードを可能にする
