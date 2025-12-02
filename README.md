@@ -1,7 +1,7 @@
 # AutomaticCreatingPluginUpdate
 
 ## 新リポジトリに移動
-[移行先](https://github.com/ringoame196-s-mcPlugin/Development/settings)
+[移行先](https://github.com/ringoame196-s-mcPlugin/Development)
 
 ## プラグイン説明
 プラグイン開発を楽にする <br>
